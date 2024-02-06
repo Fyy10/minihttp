@@ -11,7 +11,8 @@ import (
 
 func startServer() {
 	s := Server{
-		Addr: "localhost:8081",
+		// for some reason we need to use 127.0.0.1 instead of localhost here...
+		Addr: "127.0.0.1:8081",
 		VirtualHosts: map[string]string{
 			"website1": "cmd/demo/example",
 			"website2": "cmd/demo",
@@ -157,7 +158,7 @@ func Test404NotFound(t *testing.T) {
 
 	reqList := []string{
 		"GET /../ HTTP/1.1\r\nhost: website1\r\n\r\n",
-		"GET / HTTP/1.1\r\nhost: website2\r\n\r\n",
+		// "GET / HTTP/1.1\r\nhost: website2\r\n\r\n",    // this is no longer a 404 because now we return a generated dir html
 		"GET /../main.go HTTP/1.1\r\nhost:website1\r\n\r\n",
 		"GET / HTTP/1.1\r\nhost:not:a:good:host\r\n\r\n",
 		"GET /example/notfound HTTP/1.1\r\nhost:website2\r\nconnection:close\r\n\r\n",

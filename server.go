@@ -168,6 +168,29 @@ func (s *Server) handleGET(req *Request) *Response {
 	fileInfo, err := os.Stat(filePath)
 
 	if err != nil {
+		// check if we are looking for index.html
+		fileDir, fileName := path.Split(filePath)
+		fileDir += "/"
+		log.Println(fileDir)
+		log.Println(fileName)
+		log.Println(req.Host)
+		if fileName == "index.html" {
+			title := strings.TrimPrefix(fileDir, s.VirtualHosts[req.Host])
+			htmlString, _ := DirIndexHTML(fileDir, title)
+			// log.Println(htmlString)
+
+			resp.Headers["Content-Length"] = fmt.Sprint(len(htmlString))
+			resp.Body = htmlString
+			// resp.Headers["Last-Modified"] = fileInfo.ModTime().UTC().Format(time.RFC1123)
+			// resp.Headers["Content-Type"] = mime.TypeByExtension(path.Ext(filePath))
+
+			if req.Close {
+				resp.Headers["Connection"] = "close"
+			}
+
+			return resp
+		}
+
 		log.Println("file not exist, path:", filePath)
 		return ResponseNotFound(req.Proto, req.Close)
 	}
